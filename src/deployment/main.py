@@ -1,15 +1,15 @@
 from transformers import pipeline
 import json
 import nltk
+from nltk import word_tokenize
 
 def import_data():
-    data_path = 'ai_builder_sum_meet/deployment/data/1_meet.json'
+    data_path = 'qmsum_on_longformer/test_data/1_meet.json'
     data = []
     with open(data_path) as f:
         data = json.load(f)
     return data
 
-from nltk import word_tokenize
 def tokenize(sent):
     tokens = ' '.join(word_tokenize(sent.lower()))
     return tokens
@@ -26,32 +26,30 @@ def clean_data(text):
     text = text.replace('{ gap } ', '')
     return text
 
-def lang_choose(data):
-    lang = input()
-    if lang == 'en':
-        pass
-    elif lang == 'th':
-        data = translate()
-    
-
 def prepare_data(data):
-    lang_choose(data)
+    query = input()
     entire_src = []
     for i in range(len(data)):
         cur_turn = data[i]['speaker'].lower() + ': '
         cur_turn = cur_turn + tokenize(data[i]['content'])
         entire_src.append(cur_turn)
     entire_src = ' '.join(entire_src)
-    return entire_src
+    prepared_data = clean_data('<s> ' + query + ' </s> ' + entire_src + ' </s>')
+    return prepared_data
 
 def predict(selected_model, prepared_data):
     sum = pipeline(task="summarization",model=selected_model)
-    sum(prepared_data)
+    predicted = sum(prepared_data)
+    return predicted
 
+def show_output(predicted):
+    print(predicted)
 
 def main():
-    import_data()
+    data = import_data()
     prepared_data = prepare_data(data)
-    selected_model = choose_model()
-    predicted = predict(selected_model, prepared_data)
-    show_output()
+    predicted = predict('fgiuhsdfkjhfv/longsec_withno_cut', prepared_data)
+    show_output(predicted)
+
+if __name__ == "__main__": 
+    main()
