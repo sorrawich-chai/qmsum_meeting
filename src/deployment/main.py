@@ -2,11 +2,11 @@ from transformers import pipeline
 import json
 import nltk
 from nltk import word_tokenize
+import streamlit as st
 
-def import_data():
-    data_path = 'qmsum_on_longformer/test_data/1_meet.json'
-    data = []
-    with open(data_path) as f:
+def load_data(data):
+    #data_path = 'qmsum_on_longformer/test_data/1_meet.json'
+    with open(data) as f:
         data = json.load(f)
     return data
 
@@ -26,8 +26,7 @@ def clean_data(text):
     text = text.replace('{ gap } ', '')
     return text
 
-def prepare_data(data):
-    query = input()
+def prepare_data(data,query):
     entire_src = []
     for i in range(len(data)):
         cur_turn = data[i]['speaker'].lower() + ': '
@@ -42,13 +41,26 @@ def predict(selected_model, prepared_data):
     predicted = sum(prepared_data)
     return predicted
 
+
+
 def show_output(predicted):
-    print(predicted)
+    st.write('predict', predicted)
 
 def main():
-    data = import_data()
-    prepared_data = prepare_data(data)
-    predicted = predict('fgiuhsdfkjhfv/longsec_withno_cut', prepared_data)
+    uploaded_file = st.file_uploader("choose meeting json", type=['json'])
+    data = []
+    if uploaded_file is not None:
+        with open(uploaded_file, "r") as f:
+            data = json.load(f)
+        st.json(data)
+
+    model_name = st.selectbox(
+    'select model',
+    ('fgiuhsdfkjhfv/longsec_withno_cut', 'fgiuhsdfkjhfv/longsec_general_query'))
+    query = st.text_input('input query', 'summarize this meeting')
+    data = load_data(data)
+    prepared_data = prepare_data(data,query)
+    predicted = predict(model_name, prepared_data)
     show_output(predicted)
 
 if __name__ == "__main__": 
