@@ -41,23 +41,27 @@ def predict(selected_model, prepared_data):
     predicted = sum(prepared_data)
     return predicted
 
-
+def submit_check():
+    while True:
+        if st.button('submit'):
+            st.write('submitted')
+            break
 
 def show_output(predicted):
     st.write('predict', predicted)
 
 def main():
     uploaded_file = st.file_uploader("choose meeting json", type=['json'])
+    model_name = st.selectbox(
+    'select model',
+    ('fgiuhsdfkjhfv/longsec_withno_cut', 'fgiuhsdfkjhfv/longsec_general_query'))
+    query = st.text_input('input query', 'summarize this meeting')
+    submit_check()
     data = []
     if uploaded_file is not None:
         with open(uploaded_file, "r") as f:
             data = json.load(f)
         st.json(data)
-
-    model_name = st.selectbox(
-    'select model',
-    ('fgiuhsdfkjhfv/longsec_withno_cut', 'fgiuhsdfkjhfv/longsec_general_query'))
-    query = st.text_input('input query', 'summarize this meeting')
     data = load_data(data)
     prepared_data = prepare_data(data,query)
     predicted = predict(model_name, prepared_data)
